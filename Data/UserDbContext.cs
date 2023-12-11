@@ -15,5 +15,6 @@ namespace InsuranceManagement.Data
         }
 
         public DbSet<User> users { get; set; }
+        public DbSet<Insurance> insurances { get; set; }
     }
 }

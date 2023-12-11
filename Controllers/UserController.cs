@@ -25,20 +25,6 @@ namespace InsuranceManagement.Controllers
         //[Route("{email:string}/{password:string}")]
         public IActionResult GetByEmailAndPassword (string email, string password)
         {
-            //var user = userDbContext.users.FirstOrDefault(x => x.email == email && x.password == password);
-            //if(user == null)
-            //{
-            //    return NotFound();
-            //}
-
-            //var userDTO = new UserDTO();
-            //userDTO.email = user.email;
-            //userDTO.password = user.password;
-            //userDTO.displayName = user.displayName;
-            //userDTO.phone = user.phone;
-
-            //return Ok(userDTO);
-
             var user = userDbContext.users.FirstOrDefault(x => x.email == email);
             if (user == null)
             {
@@ -58,30 +44,6 @@ namespace InsuranceManagement.Controllers
             return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
         }
 
-        //[HttpPost]
-        //public IActionResult CreateUser([FromBody] UserDTO dto)
-        //{
-        //    var userDomain = new User()
-        //    {
-        //        email = dto.email,
-        //        password = dto.password,
-        //        displayName = dto.displayName,
-        //        phone = dto.phone
-        //    };
-
-        //    userDbContext.users.Add(userDomain);
-        //    userDbContext.SaveChanges();
-
-        //    var user_dto = new UserDTO()
-        //    {
-        //        email = userDomain.email,
-        //        password = userDomain.password,
-        //        displayName = userDomain.displayName,
-        //        phone = userDomain.phone
-        //    };
-
-        //    return CreatedAtAction(nameof(GetByEmailAndPassword), new { email = user_dto.email }, user_dto);
-        //}
         [HttpPost]
         public IActionResult CreateUser([FromBody] UserDTO dto)
         {
