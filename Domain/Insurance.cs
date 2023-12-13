@@ -9,6 +9,8 @@ namespace InsuranceManagement.Domain
     {
         public Guid id { get; set; }
 
+        public string name { get; set; }
+
         public string title { get; set; }
 
         public int price { get; set; }

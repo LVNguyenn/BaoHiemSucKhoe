@@ -30,6 +30,16 @@ namespace InsuranceManagement
         {
 
             services.AddControllers();
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod(); // THIS LINE RIGHT HERE IS WHAT YOU NEED
+                    });
+            });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "InsuranceManagement", Version = "v1" });

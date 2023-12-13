@@ -31,6 +31,9 @@ namespace InsuranceManagement.Migrations
                     b.Property<string>("image")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("name")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("period")
                         .HasColumnType("nvarchar(max)");
 

@@ -12,6 +12,7 @@ namespace InsuranceManagement.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     price = table.Column<int>(type: "int", nullable: false),
                     description = table.Column<string>(type: "nvarchar(max)", nullable: true),

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InsuranceManagement.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20231209130423_test")]
+    [Migration("20231213102625_test")]
     partial class test
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,9 @@ namespace InsuranceManagement.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("period")
