@@ -29,10 +29,10 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpGet]
-        [Route("id:Guid")]
-        public IActionResult GetById(Guid id)
+        [Route("{id}")]
+        public IActionResult GetById(string id)
         {
-            var insurance = userDbContext.insurances.FirstOrDefault(x => x.id == id);
+            var insurance = userDbContext.insurances.FirstOrDefault(x => x.id == Guid.Parse(id));
             if (insurance == null)
             {
                 return NotFound();
@@ -40,6 +40,7 @@ namespace InsuranceManagement.Controllers
 
             var insuranceDTO = new InsuranceDTO();
             insuranceDTO.id = insurance.id;
+            insurance.name = insurance.name;
             insuranceDTO.title = insurance.title;
             insuranceDTO.price = insurance.price;
             insuranceDTO.description = insurance.description;
@@ -50,11 +51,12 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateCourse([FromBody] InsuranceDTO dto)
+        public IActionResult CreateInsurance([FromBody] InsertInsuranceDTO dto)
         {
             var insuranceDomain = new Insurance()
             {
                 id = Guid.NewGuid(),
+                name = dto.name,
                 title = dto.title,
                 price = dto.price,
                 description = dto.description,
@@ -68,6 +70,7 @@ namespace InsuranceManagement.Controllers
             var insurance_dto = new InsuranceDTO()
             {
                 id = insuranceDomain.id,
+                name = insuranceDomain.name,
                 title = insuranceDomain.title,
                 price = insuranceDomain.price,
                 description = insuranceDomain.description,
@@ -76,6 +79,63 @@ namespace InsuranceManagement.Controllers
             };
 
             return CreatedAtAction(nameof(GetById), new { id = insurance_dto.id }, insurance_dto);
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public IActionResult Update([FromRoute] string id, [FromBody] UpdateInsuranceDTO dto)
+        {
+            var insuranceDomain = userDbContext.insurances.FirstOrDefault(x => x.id == Guid.Parse(id));
+            if (insuranceDomain == null)
+            {
+                return NotFound();
+            }
+
+            insuranceDomain.name = dto.name;
+            insuranceDomain.title = dto.title;
+            insuranceDomain.price = dto.price;
+            insuranceDomain.description = dto.description;
+            insuranceDomain.period = dto.period;
+            insuranceDomain.image = dto.image;
+
+            userDbContext.SaveChanges();
+            var updated_insurance_dto = new UpdateInsuranceDTO()
+            {
+                name = insuranceDomain.name,
+                title = insuranceDomain.title,
+                price = insuranceDomain.price,
+                description = insuranceDomain.description,
+                period = insuranceDomain.period,
+                image = insuranceDomain.image
+            };
+            return Ok(updated_insurance_dto);
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult Delete([FromRoute] string id)
+        {
+            var insuranceDomain = userDbContext.insurances.FirstOrDefault(x => x.id == Guid.Parse(id));
+            if (insuranceDomain == null)
+            {
+                return NotFound();
+            }
+
+            userDbContext.insurances.Remove(insuranceDomain);
+            userDbContext.SaveChanges();
+
+            var insuranceDTO = new InsuranceDTO()
+            {
+                id = insuranceDomain.id,
+                name = insuranceDomain.name,
+                title = insuranceDomain.title,
+                price = insuranceDomain.price,
+                description = insuranceDomain.description,
+                period = insuranceDomain.period,
+                image = insuranceDomain.image
+            };
+
+            return Ok(insuranceDTO);
         }
     }
 }

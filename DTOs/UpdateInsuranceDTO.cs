@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace InsuranceManagement.DTOs
 {
-    public class InsuranceDTO
+    public class UpdateInsuranceDTO
     {
-        public Guid id { get; set; }
-
         public string name { get; set; }
 
         public string title { get; set; }
