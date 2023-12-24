@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InsuranceManagement.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20231213102625_test")]
+    [Migration("20231224104935_test")]
     partial class test
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,12 +50,40 @@ namespace InsuranceManagement.Migrations
                     b.ToTable("insurances");
                 });
 
+            modelBuilder.Entity("InsuranceManagement.Domain.Purchase", b =>
+                {
+                    b.Property<Guid>("id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("userID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("purchaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id", "userID");
+
+                    b.HasIndex("userID");
+
+                    b.ToTable("purchases");
+                });
+
             modelBuilder.Entity("InsuranceManagement.Domain.User", b =>
                 {
-                    b.Property<string>("email")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("userID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("displayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("password")
@@ -64,9 +92,40 @@ namespace InsuranceManagement.Migrations
                     b.Property<string>("phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("email");
+                    b.HasKey("userID");
 
                     b.ToTable("users");
+                });
+
+            modelBuilder.Entity("InsuranceManagement.Domain.Purchase", b =>
+                {
+                    b.HasOne("InsuranceManagement.Domain.Insurance", "Insurance")
+                        .WithMany("Purchases")
+                        .HasForeignKey("id")
+                        .HasConstraintName("FK_Purchase_Insurance")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InsuranceManagement.Domain.User", "User")
+                        .WithMany("Purchases")
+                        .HasForeignKey("userID")
+                        .HasConstraintName("FK_Purchase_User")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Insurance");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("InsuranceManagement.Domain.Insurance", b =>
+                {
+                    b.Navigation("Purchases");
+                });
+
+            modelBuilder.Entity("InsuranceManagement.Domain.User", b =>
+                {
+                    b.Navigation("Purchases");
                 });
 #pragma warning restore 612, 618
         }

@@ -14,7 +14,29 @@ namespace InsuranceManagement.Data
 
         }
 
+        #region DbSet
         public DbSet<User> users { get; set; }
         public DbSet<Insurance> insurances { get; set; }
+        public DbSet<Purchase> purchases { get; set; }
+        #endregion
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Purchase>(entity =>
+            {
+                entity.ToTable("purchases");
+                entity.HasKey(e => new { e.id, e.userID});
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.Purchases)
+                    .HasForeignKey(e => e.userID)
+                    .HasConstraintName("FK_Purchase_User");
+
+                entity.HasOne(e => e.Insurance)
+                    .WithMany(e => e.Purchases)
+                    .HasForeignKey(e => e.id)
+                    .HasConstraintName("FK_Purchase_Insurance");
+            });
+        }
     }
 }

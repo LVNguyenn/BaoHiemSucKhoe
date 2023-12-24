@@ -40,7 +40,7 @@ namespace InsuranceManagement.Controllers
 
             var insuranceDTO = new InsuranceDTO();
             insuranceDTO.id = insurance.id;
-            insurance.name = insurance.name;
+            insuranceDTO.name = insurance.name;
             insuranceDTO.title = insurance.title;
             insuranceDTO.price = insurance.price;
             insuranceDTO.description = insurance.description;
