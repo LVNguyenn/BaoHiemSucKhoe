@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace InsuranceManagement.Domain
+namespace InsuranceManagement.DTOs
 {
-    public class Insurance
+    public class PurchasedInsuranceDTO
     {
-        public Guid id { get; set; }
-
         public string name { get; set; }
 
         public string title { get; set; }
@@ -19,13 +17,6 @@ namespace InsuranceManagement.Domain
 
         public string period { get; set; }
 
-        public string image { get; set; }
-
-        public ICollection<Purchase> Purchases { get; set; }
-
-        public Insurance()
-        {
-            Purchases = new List<Purchase>();
-        }
+        public DateTime PurchaseDate { get; set; }
     }
 }

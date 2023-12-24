@@ -35,9 +35,9 @@ namespace InsuranceManagement
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod(); // THIS LINE RIGHT HERE IS WHAT YOU NEED
+                        builder.WithOrigins("*")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod(); //THIS LINE RIGHT HERE IS WHAT YOU NEED
                     });
             });
             services.AddSwaggerGen(c =>
@@ -56,6 +56,8 @@ namespace InsuranceManagement
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "InsuranceManagement v1"));
             }
+
+            app.UseCors();
 
             app.UseHttpsRedirection();
 

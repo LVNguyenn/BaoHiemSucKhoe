@@ -21,9 +21,28 @@ namespace InsuranceManagement.Controllers
             this.userDbContext = userDbContext;
         }
 
+        //[HttpGet]
+        //public IActionResult GetAll()
+        //{
+        //    var userRMPWList = new List<UserRMPW>();
+        //    var users = userDbContext.users.ToList();
+        //    foreach (var user in users)
+        //    {
+        //        var userRMPW = new UserRMPW
+        //        {
+        //            userID = user.userID,
+        //            email = user.email,
+        //            displayName = user.displayName,
+        //            phone = user.phone,
+        //        };
+        //        userRMPWList.Add(userRMPW);
+        //    }
+        //    return Ok(userRMPWList);
+        //}
+
         [HttpGet]
         //[Route("{email:string}/{password:string}")]
-        public IActionResult GetByEmailAndPassword (string email, string password)
+        public IActionResult GetByEmailAndPassword(string email, string password)
         {
             var user = userDbContext.users.FirstOrDefault(x => x.email == email);
             if (user == null)
@@ -37,15 +56,16 @@ namespace InsuranceManagement.Controllers
             }
 
             var userDTO = new UserDTO();
+            userDTO.userID = user.userID;
             userDTO.email = user.email;
             userDTO.displayName = user.displayName;
             userDTO.phone = user.phone;
-          
+   
             return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
         }
 
         [HttpPost]
-        public IActionResult CreateUser([FromBody] UserDTO dto)
+        public IActionResult CreateUser([FromBody] InsertUserDTO dto)
         {
             // Kiểm tra xem có thiếu thông tin không
             if (string.IsNullOrWhiteSpace(dto.email) || string.IsNullOrWhiteSpace(dto.password) ||
@@ -69,6 +89,7 @@ namespace InsuranceManagement.Controllers
 
             var userDomain = new User()
             {
+                userID = Guid.NewGuid(),
                 email = dto.email,
                 password = dto.password,
                 displayName = dto.displayName,
@@ -80,6 +101,7 @@ namespace InsuranceManagement.Controllers
 
             var user_dto = new UserDTO()
             {
+                userID = userDomain.userID,
                 email = userDomain.email,
                 displayName = userDomain.displayName,
                 phone = userDomain.phone
@@ -89,5 +111,74 @@ namespace InsuranceManagement.Controllers
                 new { errorCode = 6, errorMessage = "Tài khoản được tạo thành công", user = user_dto });
         }
 
+        [HttpGet]
+        [Route("{userId}")]
+        public IActionResult GetById(string userId)
+        {
+            var user = userDbContext.users.FirstOrDefault(x => x.userID == Guid.Parse(userId));
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var userDTO = new UserDTO();
+            userDTO.userID = user.userID;
+            userDTO.email = user.email;
+            userDTO.password = user.password;
+            userDTO.displayName = user.displayName;
+            userDTO.phone = user.phone;
+
+            return Ok(userDTO);
+        }
+
+        [HttpPut]
+        [Route("{userId}")]
+        public IActionResult Update([FromRoute] string userId, [FromBody] UpdateUserDTO dto)
+        {
+            var userDomain = userDbContext.users.FirstOrDefault(x => x.userID == Guid.Parse(userId));
+            if (userDomain == null)
+            {
+                return NotFound();
+            }
+
+            //if (dto.password != dto.retypePassword)
+            //{
+            //    return BadRequest(new { errorCode = 5, errorMessage = "Mật khẩu và Nhập lại mật khẩu không giống nhau. Xin kiểm tra lại!" });
+            //}
+
+            //userDomain.password = dto.password;
+            userDomain.displayName = dto.displayName;
+            userDomain.phone = dto.phone;
+
+            userDbContext.SaveChanges();
+            var updated_user_dto = new UpdateUserDTO()
+            {
+                //password = userDomain.password,
+                //retypePassword = dto.retypePassword,
+                displayName = userDomain.displayName,
+                phone = userDomain.phone,
+            };
+
+            return Ok(updated_user_dto);
+        }
+
+        [HttpGet("{userId}/purchased-insurances")]
+        public IActionResult GetPurchasedInsurances(string userId)
+        {
+            var purchasedInsurances = userDbContext.purchases
+                .Where(p => p.userID == Guid.Parse(userId) && p.status == "Đã mua thành công")
+                .Select(p => new PurchasedInsuranceDTO
+                {
+                    name = p.Insurance.name,
+                    title = p.Insurance.title,
+                    price = p.Insurance.price,
+                    description = p.Insurance.description,
+                    period = p.Insurance.period,
+                    PurchaseDate = p.purchaseDate
+                })
+                .ToList();
+
+            return Ok(purchasedInsurances);
+        }
     }
 }

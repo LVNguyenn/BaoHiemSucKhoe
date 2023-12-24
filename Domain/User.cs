@@ -9,6 +9,8 @@ namespace InsuranceManagement.Domain
     public class User
     {
         [Key]
+        public Guid userID { get; set; }
+
         public string email { get; set; }
 
         public string password { get; set; }
@@ -16,5 +18,12 @@ namespace InsuranceManagement.Domain
         public string displayName { get; set; }
 
         public string phone { get; set; }
+
+        public ICollection<Purchase> Purchases { get; set; }
+
+        public User()
+        {
+            Purchases = new List<Purchase>();
+        }
     }
 }
