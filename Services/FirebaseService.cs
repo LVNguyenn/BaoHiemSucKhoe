@@ -50,15 +50,36 @@ namespace InsuranceManagement.Services
             try
             {
                 // error during upload will be thrown when you await the task
-                await task;
-                System.Diagnostics.Debug.WriteLine("Download link:\n" + task.TargetUrl);
-                return task.TargetUrl;
+                return await task;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Exception was thrown: {0}", ex);
                 return ex.Message;
             }
+        }
+
+        public static async Task<String> UploadToFirebase(IFormFile file)
+        {
+            if (file.Length > 0)
+            {
+                string webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                string virtualPath = "Content/Images";
+                string physicalPath = Path.Combine(webRootPath, virtualPath, file.FileName);
+                using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                    fileStream.Close();
+                    var fs = new FileStream(physicalPath, FileMode.Open);
+
+                    //Upload to firebase and get URL.
+                    var result = await Task.Run(() => FirebaseService.Upload(fs, file.FileName));
+                    fs.Close();
+
+                    return result;
+                }
+            }
+            return null;
         }
     }
 }

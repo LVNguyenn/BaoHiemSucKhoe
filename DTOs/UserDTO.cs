@@ -18,5 +18,7 @@ namespace InsuranceManagement.DTOs
         public string displayName { get; set; }
 
         public string phone { get; set; }
+
+        public string image { get; set; }
     }
 }

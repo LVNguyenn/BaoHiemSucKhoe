@@ -1,10 +1,12 @@
 ﻿using InsuranceManagement.Data;
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
+using InsuranceManagement.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -65,7 +67,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateUser([FromBody] InsertUserDTO dto)
+        public async Task<IActionResult> CreateUser([FromForm] InsertUserDTO dto)
         {
             // Kiểm tra xem có thiếu thông tin không
             if (string.IsNullOrWhiteSpace(dto.email) || string.IsNullOrWhiteSpace(dto.password) ||
@@ -87,13 +89,16 @@ namespace InsuranceManagement.Controllers
                 return BadRequest(new { errorCode = 5, errorMessage = "Mật khẩu và Nhập lại mật khẩu không giống nhau. Xin kiểm tra lại!" });
             }
 
+            string result = await FirebaseService.UploadToFirebase(dto.image);
+
             var userDomain = new User()
             {
                 userID = Guid.NewGuid(),
                 email = dto.email,
                 password = dto.password,
                 displayName = dto.displayName,
-                phone = dto.phone
+                phone = dto.phone,
+                image = result,
             };
 
             userDbContext.users.Add(userDomain);
@@ -104,7 +109,8 @@ namespace InsuranceManagement.Controllers
                 userID = userDomain.userID,
                 email = userDomain.email,
                 displayName = userDomain.displayName,
-                phone = userDomain.phone
+                phone = userDomain.phone,
+                image = userDomain.image
             };
 
             return CreatedAtAction(nameof(GetByEmailAndPassword), new { email = user_dto.email },

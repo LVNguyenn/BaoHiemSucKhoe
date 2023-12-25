@@ -19,6 +19,8 @@ namespace InsuranceManagement.Domain
 
         public string phone { get; set; }
 
+        public string image { get; set; }
+
         public ICollection<Purchase> Purchases { get; set; }
 
         public User()

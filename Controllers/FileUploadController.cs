@@ -11,7 +11,6 @@ using Firebase.Storage;
 using Microsoft.Extensions.Hosting.Internal;
 using System.Web;
 using Microsoft.AspNetCore.Hosting;
-using InsuranceManagement.Services;
 
 namespace InsuranceManagement.Controllers
 {
@@ -19,23 +18,16 @@ namespace InsuranceManagement.Controllers
     [ApiController]
     public class FileUploadController : Controller
     {
-        private static string ApiKey = "AIzaSyDkt_q4U9FdTRai-q8RtAKiP7aW93uxgms";
-        private static string Bucket = "insurance-project-file-storage.appspot.com";
-        private static string AuthEmail = "truongcuong@gmail.com";
-        private static string AuthPassword = "ungdungphantan123";
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
-        private readonly IHostingEnvironment _hostingEnvironment;
-
-        public FileUploadController(IHostingEnvironment hostingEnvironment)
+        public FileUploadController(IWebHostEnvironment hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
         }
 
-
         [HttpPost]
         public async Task<IActionResult> UploadFileDemo(IFormFile httpPostedFile)
         {
-            FileStream stream;
             if (httpPostedFile.Length > 0)
             {
                 string webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");

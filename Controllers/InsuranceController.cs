@@ -1,10 +1,12 @@
 ﻿using InsuranceManagement.Data;
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
+using InsuranceManagement.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -51,8 +53,10 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateInsurance([FromBody] InsertInsuranceDTO dto)
+        public async Task<IActionResult> CreateInsurance([FromForm] InsertInsuranceDTO dto)
         {
+            string result = await FirebaseService.UploadToFirebase(dto.image);
+
             var insuranceDomain = new Insurance()
             {
                 id = Guid.NewGuid(),
@@ -61,7 +65,7 @@ namespace InsuranceManagement.Controllers
                 price = dto.price,
                 description = dto.description,
                 period = dto.period,
-                image = dto.image
+                image = result,
             };
 
             userDbContext.insurances.Add(insuranceDomain);
