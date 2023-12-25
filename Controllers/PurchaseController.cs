@@ -29,6 +29,8 @@ namespace InsuranceManagement.Controllers
                 .Join(userDbContext.insurances, pu => pu.Purchase.id, i => i.id, (pu, i) => new { PurchaseUser = pu, Insurance = i })
                 .Select(result => new
                 {
+                    Id = result.Insurance.id,
+                    UserId = result.PurchaseUser.User.userID,
                     Email = result.PurchaseUser.User.email,
                     InsuranceName = result.Insurance.name,
                     Name = result.PurchaseUser.User.displayName,
