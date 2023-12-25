@@ -67,7 +67,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromForm] InsertUserDTO dto)
+        public async Task<IActionResult> CreateUser([FromBody] InsertUserDTO dto)
         {
             // Kiểm tra xem có thiếu thông tin không
             if (string.IsNullOrWhiteSpace(dto.email) || string.IsNullOrWhiteSpace(dto.password) ||
@@ -89,8 +89,6 @@ namespace InsuranceManagement.Controllers
                 return BadRequest(new { errorCode = 5, errorMessage = "Mật khẩu và Nhập lại mật khẩu không giống nhau. Xin kiểm tra lại!" });
             }
 
-            string result = await FirebaseService.UploadToFirebase(dto.image);
-
             var userDomain = new User()
             {
                 userID = Guid.NewGuid(),
@@ -98,7 +96,6 @@ namespace InsuranceManagement.Controllers
                 password = dto.password,
                 displayName = dto.displayName,
                 phone = dto.phone,
-                image = result,
             };
 
             userDbContext.users.Add(userDomain);
@@ -110,7 +107,6 @@ namespace InsuranceManagement.Controllers
                 email = userDomain.email,
                 displayName = userDomain.displayName,
                 phone = userDomain.phone,
-                image = userDomain.image
             };
 
             return CreatedAtAction(nameof(GetByEmailAndPassword), new { email = user_dto.email },
@@ -183,6 +179,7 @@ namespace InsuranceManagement.Controllers
                     period = p.Insurance.period,
                     PurchaseDate = p.purchaseDate,
                     status = p.status,
+                    image = p.Insurance.image
                 })
                 .ToList();
 
