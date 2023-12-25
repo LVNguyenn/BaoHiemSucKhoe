@@ -17,6 +17,8 @@ namespace InsuranceManagement.DTOs
 
         public string period { get; set; }
 
+        public string status { get; set; }
+
         public DateTime PurchaseDate { get; set; }
     }
 }

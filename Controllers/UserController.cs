@@ -166,7 +166,7 @@ namespace InsuranceManagement.Controllers
         public IActionResult GetPurchasedInsurances(string userId)
         {
             var purchasedInsurances = userDbContext.purchases
-                .Where(p => p.userID == Guid.Parse(userId) && p.status == "Đã mua thành công")
+                .Where(p => p.userID == Guid.Parse(userId))
                 .Select(p => new PurchasedInsuranceDTO
                 {
                     name = p.Insurance.name,
@@ -174,7 +174,8 @@ namespace InsuranceManagement.Controllers
                     price = p.Insurance.price,
                     description = p.Insurance.description,
                     period = p.Insurance.period,
-                    PurchaseDate = p.purchaseDate
+                    PurchaseDate = p.purchaseDate,
+                    status = p.status,
                 })
                 .ToList();
 
