@@ -169,6 +169,7 @@ namespace InsuranceManagement.Controllers
                 .Where(p => p.userID == Guid.Parse(userId))
                 .Select(p => new PurchasedInsuranceDTO
                 {
+                    id = p.Insurance.id.ToString(),
                     name = p.Insurance.name,
                     title = p.Insurance.title,
                     price = p.Insurance.price,

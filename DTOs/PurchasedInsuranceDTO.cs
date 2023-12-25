@@ -7,6 +7,8 @@ namespace InsuranceManagement.DTOs
 {
     public class PurchasedInsuranceDTO
     {
+        public string id { get; set; }
+
         public string name { get; set; }
 
         public string title { get; set; }
