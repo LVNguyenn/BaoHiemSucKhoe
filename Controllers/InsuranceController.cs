@@ -87,7 +87,7 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult Update([FromRoute] string id, [FromBody] UpdateInsuranceDTO dto)
+        public async Task<IActionResult> Update([FromRoute] string id, [FromForm] UpdateInsuranceDTO dto)
         {
             var insuranceDomain = userDbContext.insurances.FirstOrDefault(x => x.id == Guid.Parse(id));
             if (insuranceDomain == null)
@@ -95,16 +95,19 @@ namespace InsuranceManagement.Controllers
                 return NotFound();
             }
 
+            string result = await FirebaseService.UploadToFirebase(dto.image);
+
             insuranceDomain.name = dto.name;
             insuranceDomain.title = dto.title;
             insuranceDomain.price = dto.price;
             insuranceDomain.description = dto.description;
             insuranceDomain.period = dto.period;
-            insuranceDomain.image = dto.image;
+            insuranceDomain.image = result;
 
             userDbContext.SaveChanges();
-            var updated_insurance_dto = new UpdateInsuranceDTO()
+            var updated_insurance_dto = new InsuranceDTO()
             {
+                id = insuranceDomain.id,
                 name = insuranceDomain.name,
                 title = insuranceDomain.title,
                 price = insuranceDomain.price,
