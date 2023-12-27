@@ -18,7 +18,7 @@ namespace InsuranceManagement.Services
         private static string AuthEmail = "truongcuong@gmail.com";
         private static string AuthPassword = "ungdungphantan123";
 
-        public static async Task<String> Upload(FileStream stream, string fileName)
+        public static async Task<String> Upload(Stream stream, string fileName)
         {
             // FirebaseStorage.Put method accepts any type of stream.
             //var stream = new MemoryStream(Encoding.ASCII.GetBytes("Hello world!"));
@@ -63,21 +63,10 @@ namespace InsuranceManagement.Services
         {
             if (file.Length > 0)
             {
-                string webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                string virtualPath = "Content/Images";
-                string physicalPath = Path.Combine(webRootPath, virtualPath, file.FileName);
-                using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                    fileStream.Close();
-                    var fs = new FileStream(physicalPath, FileMode.Open);
-
-                    //Upload to firebase and get URL.
-                    var result = await Task.Run(() => FirebaseService.Upload(fs, file.FileName));
-                    fs.Close();
-
-                    return result;
-                }
+                var stream = file.OpenReadStream();
+                string fileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                var result = await Task.Run(() => Upload(stream, fileName));
+                return result;
             }
             return null;
         }

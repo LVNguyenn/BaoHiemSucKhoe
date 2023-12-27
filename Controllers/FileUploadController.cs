@@ -28,24 +28,8 @@ namespace InsuranceManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadFileDemo(IFormFile httpPostedFile)
         {
-            if (httpPostedFile.Length > 0)
-            {
-                string webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                string virtualPath = "Content/Images";
-                //string physicalPath = Path.Combine(_hostingEnvironment.WebRootPath, virtualPath);
-                string physicalPath = Path.Combine(webRootPath, virtualPath, httpPostedFile.FileName);
-                using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create))
-                {
-                    await httpPostedFile.CopyToAsync(fileStream);
-                    fileStream.Close();
-                    var fs = new FileStream(physicalPath, FileMode.Open);
-
-                    //Upload to firebase and get URL.
-                    var result = await Task.Run(() => FirebaseService.Upload(fs, httpPostedFile.FileName));
-                    return Ok();
-                }
-            }
-            else return BadRequest();
+            string result = await FirebaseService.UploadToFirebase(httpPostedFile);
+            return Ok(result);
         }
     }
 }
