@@ -1,33 +1,40 @@
 ﻿using Firebase.Auth;
 using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using Microsoft.AspNetCore.Hosting;
-using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Configuration;
 
 namespace InsuranceManagement.Services
 {
     public class FirebaseService
     {
-        private static string ApiKey = "AIzaSyDkt_q4U9FdTRai-q8RtAKiP7aW93uxgms";
-        private static string Bucket = "insurance-project-file-storage.appspot.com";
-        private static string AuthEmail = "truongcuong@gmail.com";
-        private static string AuthPassword = "ungdungphantan123";
+        private static string ApiKey;
+        private static string Bucket;
+        private static string AuthEmail;
+        private static string AuthPassword;
+
+        private static FirebaseAuthLink authLink;
+
+        public static void Initialize(IConfiguration configuration)
+        {
+            ApiKey = configuration.GetValue<string>("Firebase:ApiKey");
+            Bucket = configuration.GetValue<string>("Firebase:Bucket");
+            AuthEmail = configuration.GetValue<string>("Firebase:AuthEmail");
+            AuthPassword = configuration.GetValue<string>("Firebase:AuthPassword");
+        }
 
         public static async Task<String> Upload(Stream stream, string fileName)
         {
-            // FirebaseStorage.Put method accepts any type of stream.
-            //var stream = new MemoryStream(Encoding.ASCII.GetBytes("Hello world!"));
-            //var streamd = File.Open(@"C:\someFile.png", FileMode.Open);
-
-            // of course you can login using other method, not just email+password
-            var auth = new FirebaseAuthProvider(new FirebaseConfig(ApiKey));
-            var a = await auth.SignInWithEmailAndPasswordAsync(AuthEmail, AuthPassword);
-
+            if (authLink == null || authLink.IsExpired())
+            {
+                var auth = new FirebaseAuthProvider(new FirebaseConfig(ApiKey));
+                //var a = await auth.SignInWithEmailAndPasswordAsync(AuthEmail, AuthPassword);
+                authLink = await auth.SignInWithEmailAndPasswordAsync(AuthEmail, AuthPassword);
+            }
+            
             // you can use CancellationTokenSource to cancel the upload midway
             var cancellation = new CancellationTokenSource();
 
@@ -35,7 +42,7 @@ namespace InsuranceManagement.Services
                 Bucket,
                 new FirebaseStorageOptions
                 {
-                    AuthTokenAsyncFactory = () => Task.FromResult(a.FirebaseToken),
+                    AuthTokenAsyncFactory = () => Task.FromResult(authLink.FirebaseToken),
                     ThrowOnCancel = true // when you cancel the upload, exception is thrown. By default no exception is thrown
                 })
                 .Child("images")
