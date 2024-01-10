@@ -67,8 +67,14 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] InsertUserDTO dto)
+        public IActionResult CreateUser([FromBody] InsertUserDTO dto)
         {
+            if (!ModelState.IsValid)
+            { 
+                // Trả về lỗi nếu dữ liệu không hợp lệ 
+                return BadRequest(ModelState);
+            }
+
             // Kiểm tra xem có thiếu thông tin không
             if (string.IsNullOrWhiteSpace(dto.email) || string.IsNullOrWhiteSpace(dto.password) ||
                 string.IsNullOrWhiteSpace(dto.displayName) || string.IsNullOrWhiteSpace(dto.phone))
@@ -129,19 +135,22 @@ namespace InsuranceManagement.Controllers
             userDTO.password = user.password;
             userDTO.displayName = user.displayName;
             userDTO.phone = user.phone;
+            userDTO.image = user.image;
 
             return Ok(userDTO);
         }
 
         [HttpPut]
         [Route("{userId}")]
-        public IActionResult Update([FromRoute] string userId, [FromBody] UpdateUserDTO dto)
+        public async Task <IActionResult> Update([FromRoute] string userId, [FromForm] UpdateUserDTO dto)
         {
             var userDomain = userDbContext.users.FirstOrDefault(x => x.userID == Guid.Parse(userId));
             if (userDomain == null)
             {
                 return NotFound();
             }
+
+            string result = await FirebaseService.UploadToFirebase(dto.image);
 
             //if (dto.password != dto.retypePassword)
             //{
@@ -151,17 +160,20 @@ namespace InsuranceManagement.Controllers
             //userDomain.password = dto.password;
             userDomain.displayName = dto.displayName;
             userDomain.phone = dto.phone;
+            userDomain.image = result;
 
             userDbContext.SaveChanges();
-            var updated_user_dto = new UpdateUserDTO()
+
+            var user_dto = new UserDTO()
             {
                 //password = userDomain.password,
                 //retypePassword = dto.retypePassword,
                 displayName = userDomain.displayName,
                 phone = userDomain.phone,
+                image = userDomain.image,
             };
 
-            return Ok(updated_user_dto);
+            return Ok(user_dto);
         }
 
         [HttpGet("{userId}/purchased-insurances")]
