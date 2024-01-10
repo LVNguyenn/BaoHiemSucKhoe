@@ -68,6 +68,7 @@ namespace InsuranceManagement.Services
 
         public static async Task<String> UploadToFirebase(IFormFile file)
         {
+            if (file == null) return null;
             if (file.Length > 0)
             {
                 var stream = file.OpenReadStream();

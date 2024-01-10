@@ -4,22 +4,22 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace InsuranceManagement.DTOs
+namespace InsuranceManagement.Domain
 {
-    public class UserDTO
+    public class Feedback
     {
-        [Key]
-        public Guid userID { get; set; }
+        public Guid id { get; set; }
 
         [EmailAddress(ErrorMessage = "The Email field is not a valid e-mail address.")]
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "Invalid phone number format")]
         public string email { get; set; }
 
-        public string password { get; set; }
-
-        public string displayName { get; set; }
+        public string name { get; set; }
 
         public string phone { get; set; }
 
-        public string image { get; set; }
+        public string message { get; set; }
+
+        public string status { get; set; }
     }
 }

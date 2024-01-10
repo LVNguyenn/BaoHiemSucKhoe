@@ -18,6 +18,8 @@ namespace InsuranceManagement.Data
         public DbSet<User> users { get; set; }
         public DbSet<Insurance> insurances { get; set; }
         public DbSet<Purchase> purchases { get; set; }
+        public DbSet<Feedback> feedbacks { get; set; }
+
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
