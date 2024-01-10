@@ -17,10 +17,13 @@ namespace InsuranceManagement.Controllers
     public class UserController : ControllerBase
     {
         private UserDbContext userDbContext;
+        private readonly ITokenRepository tokenRepository;
 
-        public UserController(UserDbContext userDbContext)
+
+        public UserController(UserDbContext userDbContext, ITokenRepository repository)
         {
             this.userDbContext = userDbContext;
+            tokenRepository = repository;
         }
 
         //[HttpGet]
@@ -62,8 +65,10 @@ namespace InsuranceManagement.Controllers
             userDTO.email = user.email;
             userDTO.displayName = user.displayName;
             userDTO.phone = user.phone;
-   
-            return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
+
+            var jwtToken = tokenRepository.CreateJWTToken(userDTO);
+            //return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
+            return Ok(new LoginResponseDto() { token = jwtToken });
         }
 
         [HttpPost]

@@ -64,7 +64,7 @@ namespace InsuranceManagement
                             (Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                         };
                     });
-
+            services.AddScoped<ITokenRepository, JWTRepository>();
             FirebaseService.Initialize(Configuration);
         }
 

@@ -23,6 +23,4 @@ namespace InsuranceManagement
                     webBuilder.UseStartup<Startup>();
                 });
     }
-
-
 }

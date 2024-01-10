@@ -21,5 +21,8 @@ namespace InsuranceManagement.DTOs
         public string phone { get; set; }
 
         public string image { get; set; }
+
+        public string role { get; set; }
+
     }
 }
