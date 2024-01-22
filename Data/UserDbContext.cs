@@ -19,6 +19,8 @@ namespace InsuranceManagement.Data
         public DbSet<Insurance> insurances { get; set; }
         public DbSet<Purchase> purchases { get; set; }
         public DbSet<Feedback> feedbacks { get; set; }
+        public DbSet<Payment> payments  { get; set; }
+
 
         #endregion
 
@@ -27,7 +29,7 @@ namespace InsuranceManagement.Data
             modelBuilder.Entity<Purchase>(entity =>
             {
                 entity.ToTable("purchases");
-                entity.HasKey(e => new { e.id, e.userID});
+                entity.HasKey(e => new { e.id, e.userID });
 
                 entity.HasOne(e => e.User)
                     .WithMany(e => e.Purchases)
@@ -38,6 +40,16 @@ namespace InsuranceManagement.Data
                     .WithMany(e => e.Purchases)
                     .HasForeignKey(e => e.id)
                     .HasConstraintName("FK_Purchase_Insurance");
+            });
+
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.HasKey(e => new { e.id });
+
+                entity.HasOne(e => e.User)
+                    .WithMany(e => e.Payments)
+                    .HasForeignKey(e => e.userID)
+                    .HasConstraintName("FK_Payment_User");
             });
         }
     }

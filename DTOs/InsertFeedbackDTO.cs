@@ -8,13 +8,12 @@ namespace InsuranceManagement.DTOs
 {
     public class InsertFeedbackDTO
     {
-        [EmailAddress(ErrorMessage = "The Email field is not a valid e-mail address.")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
         public string email { get; set; }
 
         public string name { get; set; }
 
-        [StringLength(10, MinimumLength = 10, ErrorMessage = "Phone number must be 10 digits")]
-        [RegularExpression(@"^\d{10}$", ErrorMessage = "Invalid phone number format")]
+        [StringLength(10, MinimumLength = 10, ErrorMessage = "Số điện thoại phải có 10 chữ số")]
         public string phone { get; set; }
 
         public string message { get; set; }

@@ -84,7 +84,7 @@ namespace InsuranceManagement.Controllers
             return Ok(new
             {
                 Success = true,
-                Data = feedback_dto
+                Data = feedback_dto,
             });
         }
 
@@ -103,7 +103,7 @@ namespace InsuranceManagement.Controllers
 
             userDbContext.SaveChanges();
 
-            return Ok("Feedback updated successfully");
+            return Ok("Phản hồi đã được cập nhật thành công");
         }
     }
 }

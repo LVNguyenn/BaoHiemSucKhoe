@@ -4,14 +4,16 @@ using InsuranceManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace InsuranceManagement.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240122035216_Add Domain Payment")]
+    partial class AddDomainPayment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,12 +112,7 @@ namespace InsuranceManagement.Migrations
                     b.Property<string>("status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("userID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("id");
-
-                    b.HasIndex("userID");
 
                     b.ToTable("payments");
                 });
@@ -171,18 +168,6 @@ namespace InsuranceManagement.Migrations
                     b.ToTable("users");
                 });
 
-            modelBuilder.Entity("InsuranceManagement.Domain.Payment", b =>
-                {
-                    b.HasOne("InsuranceManagement.Domain.User", "User")
-                        .WithMany("Payments")
-                        .HasForeignKey("userID")
-                        .HasConstraintName("FK_Payment_User")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("InsuranceManagement.Domain.Purchase", b =>
                 {
                     b.HasOne("InsuranceManagement.Domain.Insurance", "Insurance")
@@ -211,8 +196,6 @@ namespace InsuranceManagement.Migrations
 
             modelBuilder.Entity("InsuranceManagement.Domain.User", b =>
                 {
-                    b.Navigation("Payments");
-
                     b.Navigation("Purchases");
                 });
 #pragma warning restore 612, 618

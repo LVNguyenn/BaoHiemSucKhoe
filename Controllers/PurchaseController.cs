@@ -76,7 +76,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPut("update-purchase")]
-        public IActionResult UpdatePurchase(Guid insuranceId, Guid userId)
+        public IActionResult Update(Guid insuranceId, Guid userId)
         {
             var purchaseToUpdate = userDbContext.purchases.FirstOrDefault(p => p.id == insuranceId && p.userID == userId);
 
@@ -88,8 +88,7 @@ namespace InsuranceManagement.Controllers
             purchaseToUpdate.status = "Đã mua thành công";
 
             userDbContext.SaveChanges();
-
-            return Ok("Purchase updated successfully");
+            return Ok("Tình trạng đã được cập nhật thành công");
         }
     }
 }

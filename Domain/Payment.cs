@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace InsuranceManagement.Domain
 {
-    public class Feedback
+    public class Payment
     {
         public Guid id { get; set; }
+
+        public Guid userID { get; set; }
 
         [EmailAddress(ErrorMessage = "Email không hợp lệ")]
         public string email { get; set; }
@@ -18,8 +20,21 @@ namespace InsuranceManagement.Domain
         [StringLength(10, MinimumLength = 10, ErrorMessage = "Số điện thoại phải có 10 chữ số")]
         public string phone { get; set; }
 
-        public string message { get; set; }
+        public string image { get; set; }
+
+        [StringLength(14, MinimumLength = 9, ErrorMessage = "Vui lòng nhập số tài khoản hợp lệ (9-14 số)")]
+        public string bankAccount { get; set; }
+
+        public string bankName { get; set; }
+
+        public string note { get; set; }
 
         public string status { get; set; }
+
+        public string reason { get; set; }
+
+        // relationship
+
+        public User User { get; set; }
     }
 }
