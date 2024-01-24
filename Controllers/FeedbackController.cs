@@ -3,6 +3,7 @@ using InsuranceManagement.Data;
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
 using InsuranceManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -34,6 +35,7 @@ namespace InsuranceManagement.Controllers
         
         [HttpGet]
         [Route("{id}")]
+        [Authorize]
         public IActionResult GetById(Guid id)
         {
             var feedback = feedbackRepository.GetById(id);
@@ -71,6 +73,7 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [Authorize]
         public IActionResult UpdatePurchase(Guid id)
         {
             var feedbackToUpdate = feedbackRepository.GetById(id);

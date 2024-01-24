@@ -2,6 +2,7 @@
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
 using InsuranceManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -23,8 +24,11 @@ namespace InsuranceManagement.Controllers
             this.insuranceRepository = insuranceRepository;
             this._mapper = mapper;
         }
-        
-        [HttpGet] public IActionResult GetAll()
+
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetAll()
         {
             return Ok(insuranceRepository.GetAll());
         }
@@ -43,6 +47,7 @@ namespace InsuranceManagement.Controllers
             return Ok(insuranceDTO);
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpPost] public async Task<IActionResult> Create([FromForm] InsertInsuranceDTO dto) 
         { 
             string result = await FirebaseService.UploadToFirebase(dto.image);
@@ -54,6 +59,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromForm] UpdateInsuranceDTO dto)
         {
             var insuranceEntity = insuranceRepository.GetById(id);
@@ -76,6 +82,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public IActionResult Delete(Guid id)
         {
             var insuranceEntity = insuranceRepository.GetById(id);

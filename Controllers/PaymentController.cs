@@ -3,6 +3,7 @@ using InsuranceManagement.Data;
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
 using InsuranceManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -26,6 +27,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public IActionResult GetAll()
         {
             return Ok(paymentRepository.GetAll());
@@ -33,6 +35,7 @@ namespace InsuranceManagement.Controllers
         
         [HttpGet]
         [Route("{id}")]
+        [Authorize]
         public IActionResult GetById(Guid id)
         {
             var payment = paymentRepository.GetById(id);
@@ -48,6 +51,7 @@ namespace InsuranceManagement.Controllers
 
         
         [HttpPost]
+        //[Authorize(Roles = "Customer")]
         public async Task<IActionResult> Create([FromForm] InsertPaymentDTO dto)
         {
             if (!ModelState.IsValid)
@@ -61,6 +65,7 @@ namespace InsuranceManagement.Controllers
             var paymentDomain = _mapper.Map<Payment>(dto);
             paymentDomain.status = "Đang chờ phản hồi";
             paymentDomain.reason = "";
+            paymentDomain.image = result;
 
             var createdInsurance = paymentRepository.Create(paymentDomain);
             var payment_dto = _mapper.Map<Payment>(paymentDomain);
@@ -74,6 +79,7 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [Authorize]
         public IActionResult Update([FromRoute] Guid id, [FromForm] UpdatePaymentDTO dto)
         {
             var paymentDomain = paymentRepository.GetById(id);

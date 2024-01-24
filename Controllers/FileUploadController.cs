@@ -1,15 +1,7 @@
-﻿using Firebase.Auth;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using System.Threading;
-using System;
 using InsuranceManagement.Services;
-using Firebase.Storage;
-using Microsoft.Extensions.Hosting.Internal;
-using System.Web;
 using Microsoft.AspNetCore.Hosting;
 
 namespace InsuranceManagement.Controllers
@@ -19,10 +11,12 @@ namespace InsuranceManagement.Controllers
     public class FileUploadController : Controller
     {
         private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public FileUploadController(IWebHostEnvironment hostingEnvironment)
+        public FileUploadController(IWebHostEnvironment hostingEnvironment, IPasswordHasher passwordHasher)
         {
             _hostingEnvironment = hostingEnvironment;
+            _passwordHasher = passwordHasher;
         }
 
         [HttpPost]

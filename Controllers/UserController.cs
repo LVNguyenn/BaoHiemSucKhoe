@@ -2,12 +2,16 @@
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
 using InsuranceManagement.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 
 namespace InsuranceManagement.Controllers
@@ -18,12 +22,13 @@ namespace InsuranceManagement.Controllers
     {
         private UserDbContext userDbContext;
         private readonly ITokenRepository tokenRepository;
+        private readonly IPasswordHasher passwordHasher;
 
-
-        public UserController(UserDbContext userDbContext, ITokenRepository repository)
+        public UserController(UserDbContext userDbContext, ITokenRepository repository, IPasswordHasher passwordHasher)
         {
             this.userDbContext = userDbContext;
             tokenRepository = repository;
+            this.passwordHasher = passwordHasher;
         }
 
         //[HttpGet]
@@ -54,8 +59,8 @@ namespace InsuranceManagement.Controllers
             {
                 return NotFound(new { errorCode = 1, errorMessage = "Tài khoản không tồn tại" });
             }
-
-            if (user.password != password)
+            //if (user.password != password)
+            if (user.password != passwordHasher.HashPassword(password))
             {
                 return BadRequest(new { errorCode = 2, errorMessage = "Mật khẩu không đúng" });
             }
@@ -67,6 +72,14 @@ namespace InsuranceManagement.Controllers
             userDTO.phone = user.phone;
 
             var jwtToken = tokenRepository.CreateJWTToken(userDTO);
+
+            /*var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true, // Set the cookie as HTTP-only
+                SameSite = SameSiteMode.None,
+            };*/
+
+            //Response.Cookies.Append("jwtToken", jwtToken, cookieOptions);
             //return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
             return Ok(new LoginResponseDto() { token = jwtToken });
         }
@@ -104,7 +117,8 @@ namespace InsuranceManagement.Controllers
             {
                 userID = Guid.NewGuid(),
                 email = dto.email,
-                password = dto.password,
+                /*password =   dto.password,*/
+                password = passwordHasher.HashPassword(dto.password),
                 displayName = dto.displayName,
                 phone = dto.phone,
             };
@@ -126,6 +140,7 @@ namespace InsuranceManagement.Controllers
 
         [HttpGet]
         [Route("{userId}")]
+        [Authorize]
         public IActionResult GetById(string userId)
         {
             var user = userDbContext.users.FirstOrDefault(x => x.userID == Guid.Parse(userId));
@@ -147,6 +162,7 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{userId}")]
+        [Authorize]
         public async Task <IActionResult> Update([FromRoute] string userId, [FromForm] UpdateUserDTO dto)
         {
             var userDomain = userDbContext.users.FirstOrDefault(x => x.userID == Guid.Parse(userId));
@@ -182,6 +198,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpGet("{userId}/purchased-insurances")]
+        [Authorize]
         public IActionResult GetPurchasedInsurances(string userId)
         {
             var purchasedInsurances = userDbContext.purchases

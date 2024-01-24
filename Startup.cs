@@ -21,6 +21,7 @@ using InsuranceManagement.Domain;
 using InsuranceManagement.Controllers;
 using InsuranceManagement.Repositories;
 using InsuranceManagement.DTOs;
+using System.Security.Claims;
 
 namespace InsuranceManagement
 {
@@ -43,10 +44,10 @@ namespace InsuranceManagement
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins("*")
+                        builder.WithOrigins(Configuration.GetSection("AllowedOrigins").Get<string[]>())
                             .AllowAnyHeader()
-                            .AllowAnyMethod(); //THIS LINE RIGHT HERE IS WHAT YOU NEED
-                            //.AllowCredentials();
+                            .AllowAnyMethod()
+                            .AllowCredentials();
                     });
             });
             services.AddSwaggerGen(c =>
@@ -56,7 +57,6 @@ namespace InsuranceManagement
 
             services.AddAutoMapper(typeof(Startup));
 
-
             // Repository
             services.AddScoped<IRepository<Insurance>, InsuranceRepository>();
             services.AddScoped<IRepository<Feedback>, FeedbackRepository>();
@@ -64,6 +64,8 @@ namespace InsuranceManagement
             services.AddScoped<IRepository<Payment>, PaymentRepository>();
 
             services.AddDbContext<UserDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("myconnection")));
+
+            //JWT
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                     {
@@ -79,7 +81,21 @@ namespace InsuranceManagement
                             (Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                         };
                     });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminPolicy", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, "Admin");
+                });
+                options.AddPolicy("CustomerPolicy", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, "Customer");
+                });
+            });
+
             services.AddScoped<ITokenRepository, JWTRepository>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
             FirebaseService.Initialize(Configuration);
         }
 
@@ -98,6 +114,8 @@ namespace InsuranceManagement
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

@@ -31,7 +31,6 @@ namespace InsuranceManagement.Services
             if (authLink == null || authLink.IsExpired())
             {
                 var auth = new FirebaseAuthProvider(new FirebaseConfig(ApiKey));
-                //var a = await auth.SignInWithEmailAndPasswordAsync(AuthEmail, AuthPassword);
                 authLink = await auth.SignInWithEmailAndPasswordAsync(AuthEmail, AuthPassword);
             }
             

@@ -3,10 +3,12 @@ using InsuranceManagement.Data;
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
 using InsuranceManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,6 +36,7 @@ namespace InsuranceManagement.Controllers
         //}
 
         [HttpGet("purchase-details")]
+        [Authorize]
         public IActionResult GetPurchaseDetails()
         {
             var purchaseDetails = userDbContext.purchases
@@ -57,8 +60,12 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult Create([FromBody] PurchaseDTO dto)
         {
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            System.Diagnostics.Debug.WriteLine("token value: " + token);
+
             var purchaseDomain = _mapper.Map<Purchase>(dto);
             purchaseDomain.purchaseDate = DateTime.Now;
             purchaseDomain.status = "Đang chờ xét duyệt";
@@ -74,6 +81,7 @@ namespace InsuranceManagement.Controllers
         }
         
         [HttpPut("update-purchase")]
+        [Authorize]
         public IActionResult Update(Guid insuranceId, Guid userId)
         {
             var purchaseToUpdate = purchaseRepository.GetById(insuranceId, userId);
