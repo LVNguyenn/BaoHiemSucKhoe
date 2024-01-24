@@ -1,6 +1,8 @@
-﻿using InsuranceManagement.Data;
+﻿using AutoMapper;
+using InsuranceManagement.Data;
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
+using InsuranceManagement.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,12 +16,22 @@ namespace InsuranceManagement.Controllers
     [ApiController]
     public class PurchaseController : ControllerBase
     {
-        private UserDbContext userDbContext;
+        private readonly IRepository<Purchase> purchaseRepository;
+        private readonly IMapper _mapper;
+        private readonly UserDbContext userDbContext;
 
-        public PurchaseController(UserDbContext userDbContext)
+        public PurchaseController(IRepository<Purchase> purchaseRepository, IMapper mapper, UserDbContext userDbContext)
         {
+            this.purchaseRepository = purchaseRepository;
+            this._mapper = mapper;
             this.userDbContext = userDbContext;
         }
+
+        //[HttpGet("purchase-details")]
+        //public IActionResult GetPurchaseDetails()
+        //{
+        //    return Ok(purchaseRepository.GetAll());
+        //}
 
         [HttpGet("purchase-details")]
         public IActionResult GetPurchaseDetails()
@@ -47,26 +59,12 @@ namespace InsuranceManagement.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] PurchaseDTO dto)
         {
-            var purchaseDomain = new Purchase()
-            {
-                id = dto.id,
-                userID = dto.userID,
-                purchaseDate = DateTime.Now,
-                status = "Đang chờ xét duyệt",
-                note = dto.note,
-            };
+            var purchaseDomain = _mapper.Map<Purchase>(dto);
+            purchaseDomain.purchaseDate = DateTime.Now;
+            purchaseDomain.status = "Đang chờ xét duyệt";
 
-            userDbContext.purchases.Add(purchaseDomain);
-            userDbContext.SaveChanges();
-
-            var purchase_dto = new PurchaseDTO()
-            {
-                id = purchaseDomain.id,
-                userID = purchaseDomain.userID,
-                purchaseDate = purchaseDomain.purchaseDate,
-                status = purchaseDomain.status,
-                note = purchaseDomain.note,
-            };
+            var createdPurchase = purchaseRepository.Create(purchaseDomain);
+            var purchase_dto = _mapper.Map<PurchaseDTO>(purchaseDomain);
 
             return Ok(new
             {
@@ -74,11 +72,11 @@ namespace InsuranceManagement.Controllers
                 Data = purchase_dto
             });
         }
-
+        
         [HttpPut("update-purchase")]
         public IActionResult Update(Guid insuranceId, Guid userId)
         {
-            var purchaseToUpdate = userDbContext.purchases.FirstOrDefault(p => p.id == insuranceId && p.userID == userId);
+            var purchaseToUpdate = purchaseRepository.GetById(insuranceId, userId);
 
             if (purchaseToUpdate == null)
             {
@@ -87,7 +85,7 @@ namespace InsuranceManagement.Controllers
 
             purchaseToUpdate.status = "Đã mua thành công";
 
-            userDbContext.SaveChanges();
+            purchaseRepository.Update(insuranceId, purchaseToUpdate, userId);
             return Ok("Tình trạng đã được cập nhật thành công");
         }
     }

@@ -23,7 +23,7 @@ namespace InsuranceManagement.Domain
 
         public string image { get; set; }
 
-        //public string role { get; set; }
+        public string role { get; set; }
 
         public ICollection<Purchase> Purchases { get; set; }
 

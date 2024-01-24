@@ -1,4 +1,5 @@
 ﻿using InsuranceManagement.Domain;
+using InsuranceManagement.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,6 @@ namespace InsuranceManagement.Data
         public DbSet<Purchase> purchases { get; set; }
         public DbSet<Feedback> feedbacks { get; set; }
         public DbSet<Payment> payments  { get; set; }
-
 
         #endregion
 

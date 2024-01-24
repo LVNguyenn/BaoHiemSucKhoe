@@ -1,6 +1,8 @@
-﻿using InsuranceManagement.Data;
+﻿using AutoMapper;
+using InsuranceManagement.Data;
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
+using InsuranceManagement.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,39 +16,34 @@ namespace InsuranceManagement.Controllers
     [ApiController]
     public class FeedbackController : ControllerBase
     {
-        private UserDbContext userDbContext;
+        private readonly IRepository<Feedback> feedbackRepository;
+        private readonly IMapper _mapper;
 
-        public FeedbackController(UserDbContext userDbContext)
+        public FeedbackController(IRepository<Feedback> feedbackRepository, IMapper mapper)
         {
-            this.userDbContext = userDbContext;
+            this.feedbackRepository = feedbackRepository;
+            this._mapper = mapper;
         }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            var feedback = userDbContext.feedbacks.ToList();
-            return Ok(feedback);
+            return Ok(feedbackRepository.GetAll());
         }
 
+        
         [HttpGet]
         [Route("{id}")]
-        public IActionResult GetById(string id)
+        public IActionResult GetById(Guid id)
         {
-            var feedback = userDbContext.feedbacks.FirstOrDefault(x => x.id == Guid.Parse(id));
+            var feedback = feedbackRepository.GetById(id);
+
             if (feedback == null)
             {
                 return NotFound();
             }
 
-            var feedbackDTO = new Feedback();
-            
-            feedbackDTO.id = feedback.id;
-            feedbackDTO.email = feedback.email;
-            feedbackDTO.name = feedback.name;
-            feedbackDTO.phone = feedback.phone;
-            feedbackDTO.message = feedback.message;
-            feedbackDTO.status = feedback.status;
-
+            var feedbackDTO = _mapper.Map<Feedback>(feedback);
             return Ok(feedbackDTO);
         }
 
@@ -59,27 +56,11 @@ namespace InsuranceManagement.Controllers
                 return BadRequest(ModelState);
             }
 
-            var feedbackDomain = new Feedback()
-            {
-                email = dto.email,
-                name = dto.name,
-                phone = dto.phone,
-                message = dto.message,
-                status = "Đang chờ phản hồi",
-            };
+            var feedbackDomain = _mapper.Map<Feedback>(dto);
+            feedbackDomain.status = "Đang chờ phản hồi";
 
-            userDbContext.feedbacks.Add(feedbackDomain);
-            userDbContext.SaveChanges();
-
-            var feedback_dto = new Feedback()
-            {
-                id = feedbackDomain.id,
-                email = feedbackDomain.email,
-                name = feedbackDomain.name,
-                phone = feedbackDomain.phone,
-                message = feedbackDomain.message,
-                status = feedbackDomain.status,
-            };
+            var createdFeedback = feedbackRepository.Create(feedbackDomain);
+            var feedback_dto = _mapper.Map<Feedback>(feedbackDomain);
 
             return Ok(new
             {
@@ -90,9 +71,9 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult UpdatePurchase(string id)
+        public IActionResult UpdatePurchase(Guid id)
         {
-            var feedbackToUpdate = userDbContext.feedbacks.FirstOrDefault(p => p.id == Guid.Parse(id));
+            var feedbackToUpdate = feedbackRepository.GetById(id);
 
             if (feedbackToUpdate == null)
             {
@@ -100,8 +81,7 @@ namespace InsuranceManagement.Controllers
             }
 
             feedbackToUpdate.status = "Đã phản hồi";
-
-            userDbContext.SaveChanges();
+            feedbackRepository.Update(id, feedbackToUpdate);
 
             return Ok("Phản hồi đã được cập nhật thành công");
         }

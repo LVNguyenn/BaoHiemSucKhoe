@@ -17,6 +17,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using InsuranceManagement.Services;
+using InsuranceManagement.Domain;
+using InsuranceManagement.Controllers;
+using InsuranceManagement.Repositories;
+using InsuranceManagement.DTOs;
 
 namespace InsuranceManagement
 {
@@ -42,12 +46,23 @@ namespace InsuranceManagement
                         builder.WithOrigins("*")
                             .AllowAnyHeader()
                             .AllowAnyMethod(); //THIS LINE RIGHT HERE IS WHAT YOU NEED
+                            //.AllowCredentials();
                     });
             });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "InsuranceManagement", Version = "v1" });
             });
+
+            services.AddAutoMapper(typeof(Startup));
+
+
+            // Repository
+            services.AddScoped<IRepository<Insurance>, InsuranceRepository>();
+            services.AddScoped<IRepository<Feedback>, FeedbackRepository>();
+            services.AddScoped<IRepository<Purchase>, PurchaseRepository>();
+            services.AddScoped<IRepository<Payment>, PaymentRepository>();
+
             services.AddDbContext<UserDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("myconnection")));
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>

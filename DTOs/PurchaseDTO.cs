@@ -14,8 +14,6 @@ namespace InsuranceManagement.DTOs
 
         public DateTime purchaseDate { get; set; }
 
-        public string status { get; set; }
-
         public string note { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using InsuranceManagement.Data;
+﻿using AutoMapper;
+using InsuranceManagement.Data;
 using InsuranceManagement.Domain;
 using InsuranceManagement.DTOs;
 using InsuranceManagement.Services;
@@ -15,46 +16,37 @@ namespace InsuranceManagement.Controllers
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        private UserDbContext userDbContext;
+        private readonly IRepository<Payment> paymentRepository;
+        private readonly IMapper _mapper;
 
-        public PaymentController(UserDbContext userDbContext)
+        public PaymentController(IRepository<Payment> paymentRepository, IMapper mapper)
         {
-            this.userDbContext = userDbContext;
+            this.paymentRepository = paymentRepository;
+            this._mapper = mapper;
         }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            var feedback = userDbContext.payments.ToList();
-            return Ok(feedback);
+            return Ok(paymentRepository.GetAll());
         }
-
+        
         [HttpGet]
         [Route("{id}")]
-        public IActionResult GetById(string id)
+        public IActionResult GetById(Guid id)
         {
-            var payment = userDbContext.payments.FirstOrDefault(x => x.id == Guid.Parse(id));
+            var payment = paymentRepository.GetById(id);
+
             if (payment == null)
             {
                 return NotFound();
             }
 
-            var paymentDTO = new Payment();
-
-            paymentDTO.id = payment.id;
-            paymentDTO.email = payment.email;
-            paymentDTO.name = payment.name;
-            paymentDTO.phone = payment.phone;
-            paymentDTO.image = payment.image;
-            paymentDTO.bankAccount = payment.bankAccount;
-            paymentDTO.bankName = payment.bankName;
-            paymentDTO.note = payment.note;
-            paymentDTO.status = payment.status;
-            paymentDTO.reason = payment.reason;
-
+            var paymentDTO = _mapper.Map<Payment>(payment);
             return Ok(paymentDTO);
         }
 
+        
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] InsertPaymentDTO dto)
         {
@@ -66,37 +58,12 @@ namespace InsuranceManagement.Controllers
 
             string result = await FirebaseService.UploadToFirebase(dto.image);
 
-            var paymentDomain = new Payment()
-            {
-                email = dto.email,
-                name = dto.name,
-                phone = dto.phone,
-                image = result,
-                bankAccount = dto.bankAccount,
-                bankName = dto.bankName,
-                note = dto.note,
-                status = "Đang chờ phản hồi",
-                reason = "",
-                userID = dto.userID,
-            };
+            var paymentDomain = _mapper.Map<Payment>(dto);
+            paymentDomain.status = "Đang chờ phản hồi";
+            paymentDomain.reason = "";
 
-            userDbContext.payments.Add(paymentDomain);
-            userDbContext.SaveChanges();
-
-            var payment_dto = new Payment()
-            {
-                id = paymentDomain.id,
-                email = paymentDomain.email,
-                name = paymentDomain.name,
-                phone = paymentDomain.phone,
-                image = paymentDomain.image,
-                bankAccount = paymentDomain.bankAccount,
-                bankName = paymentDomain.bankName,
-                note = paymentDomain.note,
-                status = paymentDomain.status,
-                reason = paymentDomain.reason,
-                userID = paymentDomain.userID,
-            };
+            var createdInsurance = paymentRepository.Create(paymentDomain);
+            var payment_dto = _mapper.Map<Payment>(paymentDomain);
 
             return Ok(new
             {
@@ -107,9 +74,10 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult Update([FromRoute] string id, [FromForm] UpdatePaymentDTO dto)
+        public IActionResult Update([FromRoute] Guid id, [FromForm] UpdatePaymentDTO dto)
         {
-            var paymentDomain = userDbContext.payments.FirstOrDefault(x => x.id == Guid.Parse(id));
+            var paymentDomain = paymentRepository.GetById(id);
+
             if (paymentDomain == null)
             {
                 return NotFound();
@@ -118,22 +86,12 @@ namespace InsuranceManagement.Controllers
             paymentDomain.status = dto.status;
             paymentDomain.reason = dto.reason;
 
-            userDbContext.SaveChanges();
+            paymentRepository.Update(id, paymentDomain);
 
-            var updated_payment_dto = new Payment()
-            {
-                id = paymentDomain.id,
-                email = paymentDomain.email,
-                name = paymentDomain.name,
-                phone = paymentDomain.phone,
-                image = paymentDomain.image,
-                bankAccount = paymentDomain.bankAccount,
-                bankName = paymentDomain.bankName,
-                note = paymentDomain.note,
-                status = paymentDomain.status,
-                reason = paymentDomain.reason,
-            };
+            var updated_payment_dto = _mapper.Map<Payment>(paymentDomain);
+
             return Ok(updated_payment_dto);
         }
+        
     }
 }
