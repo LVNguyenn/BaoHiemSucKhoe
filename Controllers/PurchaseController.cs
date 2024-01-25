@@ -32,7 +32,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpGet("purchase-details")]
-        //[Authorize]
+        [Authorize]
         public IActionResult GetPurchaseDetails()
         {
             var purchaseDetails = userDbContext.purchases
@@ -56,12 +56,13 @@ namespace InsuranceManagement.Controllers
         }
         
         [HttpPost]
+        [Authorize]
         public IActionResult Create([FromBody] PurchaseDTO dto)
         {
             try
             {
-                var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                System.Diagnostics.Debug.WriteLine("token value: " + token);
+                /*var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                System.Diagnostics.Debug.WriteLine("token value: " + token);*/
 
                 var purchaseDomain = _mapper.Map<Purchase>(dto);
                 purchaseDomain.purchaseDate = DateTime.Now;
@@ -98,7 +99,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpPut("update-purchase")]
-        //[Authorize]
+        [Authorize]
         public IActionResult Update(Guid insuranceId, Guid userId)
         {
             var purchaseToUpdate = purchaseRepository.GetById(insuranceId, userId);

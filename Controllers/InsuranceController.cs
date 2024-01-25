@@ -27,7 +27,6 @@ namespace InsuranceManagement.Controllers
 
 
         [HttpGet]
-        //[Authorize]
         public IActionResult GetAll()
         {
             return Ok(insuranceRepository.GetAll());
@@ -47,7 +46,7 @@ namespace InsuranceManagement.Controllers
             return Ok(insuranceDTO);
         }
 
-        //[Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Customer")]
         [HttpPost] public async Task<IActionResult> Create([FromForm] InsertInsuranceDTO dto) 
         { 
             string result = await FirebaseService.UploadToFirebase(dto.image);
@@ -85,7 +84,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpDelete("{id}")]
-        //[Authorize]
+        [Authorize]
         public IActionResult Delete(Guid id)
         {
             var insuranceEntity = insuranceRepository.GetById(id);

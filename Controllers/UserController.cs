@@ -93,7 +93,7 @@ namespace InsuranceManagement.Controllers
                 return NotFound(new { errorCode = 1, errorMessage = "Tài khoản không tồn tại" });
             }
 
-            if (user.password != login.password)
+            if (user.password != passwordHasher.HashPassword(login.password))
             {
                 return BadRequest(new { errorCode = 2, errorMessage = "Mật khẩu không đúng" });
             }
@@ -106,9 +106,14 @@ namespace InsuranceManagement.Controllers
 
             var jwtToken = tokenRepository.CreateJWTToken(userDTO);
 
-            // Phần code xử lý cookie nếu cần thiết
+            /*var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true, // Set the cookie as HTTP-only
+                SameSite = SameSiteMode.None,
+            };*/
 
-            return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
+            //Response.Cookies.Append("jwtToken", jwtToken, cookieOptions);
+            return Ok(new LoginResponseDto() { token = jwtToken });
         }
 
         [HttpPost("sign-up")]
@@ -144,8 +149,8 @@ namespace InsuranceManagement.Controllers
             {
                 userID = Guid.NewGuid(),
                 email = dto.email,
-                password = dto.password,
-                //password = passwordHasher.HashPassword(dto.password),
+                //password = dto.password,
+                password = passwordHasher.HashPassword(dto.password),
                 displayName = dto.displayName,
                 phone = dto.phone,
                 role = "Customer"
@@ -191,7 +196,7 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{userId}")]
-        //[Authorize]
+        [Authorize]
         public async Task <IActionResult> Update([FromRoute] string userId, [FromForm] UpdateUserDTO dto)
         {
             var userDomain = userDbContext.users.FirstOrDefault(x => x.userID == Guid.Parse(userId));
@@ -219,7 +224,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpGet("{userId}/purchased-insurances")]
-        //[Authorize]
+        [Authorize]
         public IActionResult GetPurchasedInsurances(string userId)
         {
             var purchasedInsurances = userDbContext.purchases
@@ -242,7 +247,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpGet("{userId}/payment")]
-        //[Authorize]
+        [Authorize]
         public IActionResult GetPayment(string userId)
         {
             // ghi chu, hinh anh, tinh trang

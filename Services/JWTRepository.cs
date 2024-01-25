@@ -31,10 +31,7 @@ namespace InsuranceManagement.Services
             claim.Add(new Claim("email", user.email));
             claim.Add(new Claim("phone", user.phone));
             claim.Add(new Claim("image", user.image != null ? user.image : ""));
-            //claim.Add(new Claim(ClaimTypes.Role, "Customer"));
-            
-            //claim.Add(new Claim(ClaimTypes.Role, user.role));
-            //claim.Add(new Claim("role", user.role));
+            claim.Add(new Claim(ClaimTypes.Role, user.role != null ? user.role : "Customer"));
 
             // create key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
