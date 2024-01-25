@@ -44,10 +44,15 @@ namespace InsuranceManagement
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins(Configuration.GetSection("AllowedOrigins").Get<string[]>())
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
+                        //builder.WithOrigins(Configuration.GetSection("AllowedOrigins").Get<string[]>())
+                        //builder.WithOrigins("*")
+                        //  .AllowAnyHeader()
+                        //  .AllowAnyMethod()
+                        //  .AllowCredentials();
+
+                        builder.WithOrigins("*")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod(); //THIS LINE RIGHT HERE IS WHAT YOU NEED
                     });
             });
             services.AddSwaggerGen(c =>

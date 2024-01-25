@@ -6,6 +6,8 @@ using InsuranceManagement.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
@@ -29,14 +31,8 @@ namespace InsuranceManagement.Controllers
             this.userDbContext = userDbContext;
         }
 
-        //[HttpGet("purchase-details")]
-        //public IActionResult GetPurchaseDetails()
-        //{
-        //    return Ok(purchaseRepository.GetAll());
-        //}
-
         [HttpGet("purchase-details")]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetPurchaseDetails()
         {
             var purchaseDetails = userDbContext.purchases
@@ -58,30 +54,51 @@ namespace InsuranceManagement.Controllers
 
             return Ok(purchaseDetails);
         }
-
+        
         [HttpPost]
-        [Authorize]
         public IActionResult Create([FromBody] PurchaseDTO dto)
         {
-            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            System.Diagnostics.Debug.WriteLine("token value: " + token);
-
-            var purchaseDomain = _mapper.Map<Purchase>(dto);
-            purchaseDomain.purchaseDate = DateTime.Now;
-            purchaseDomain.status = "Đang chờ xét duyệt";
-
-            var createdPurchase = purchaseRepository.Create(purchaseDomain);
-            var purchase_dto = _mapper.Map<PurchaseDTO>(purchaseDomain);
-
-            return Ok(new
+            try
             {
-                Success = true,
-                Data = purchase_dto
-            });
+                var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                System.Diagnostics.Debug.WriteLine("token value: " + token);
+
+                var purchaseDomain = _mapper.Map<Purchase>(dto);
+                purchaseDomain.purchaseDate = DateTime.Now;
+                purchaseDomain.status = "Đang chờ xét duyệt";
+
+                var createdPurchase = purchaseRepository.Create(purchaseDomain);
+                var purchase_dto = _mapper.Map<PurchaseDTO>(createdPurchase);
+
+                return Ok(new
+                {
+                    Success = true,
+                    Data = purchase_dto
+                });
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException is SqlException sqlException)
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        ErrorMessage = "Mỗi người dùng chỉ được mua một gói bảo hiểm."
+                    });
+                }
+                else
+                {
+                    return StatusCode(500, new
+                    {
+                        Success = false,
+                        ErrorMessage = "Đã xảy ra lỗi khi mua."
+                    });
+                }
+            }
         }
-        
+
         [HttpPut("update-purchase")]
-        [Authorize]
+        //[Authorize]
         public IActionResult Update(Guid insuranceId, Guid userId)
         {
             var purchaseToUpdate = purchaseRepository.GetById(insuranceId, userId);

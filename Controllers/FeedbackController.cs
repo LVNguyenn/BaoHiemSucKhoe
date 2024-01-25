@@ -35,7 +35,7 @@ namespace InsuranceManagement.Controllers
         
         [HttpGet]
         [Route("{id}")]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetById(Guid id)
         {
             var feedback = feedbackRepository.GetById(id);
@@ -73,7 +73,7 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        [Authorize]
+        //[Authorize]
         public IActionResult UpdatePurchase(Guid id)
         {
             var feedbackToUpdate = feedbackRepository.GetById(id);

@@ -27,7 +27,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetAll()
         {
             return Ok(paymentRepository.GetAll());
@@ -35,7 +35,7 @@ namespace InsuranceManagement.Controllers
         
         [HttpGet]
         [Route("{id}")]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetById(Guid id)
         {
             var payment = paymentRepository.GetById(id);
@@ -79,8 +79,8 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        [Authorize]
-        public IActionResult Update([FromRoute] Guid id, [FromForm] UpdatePaymentDTO dto)
+        //[Authorize]
+        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdatePaymentDTO dto)
         {
             var paymentDomain = paymentRepository.GetById(id);
 

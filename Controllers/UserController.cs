@@ -31,36 +31,69 @@ namespace InsuranceManagement.Controllers
             this.passwordHasher = passwordHasher;
         }
 
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var userRMPWList = new List<UserRMPW>();
+            var users = userDbContext.users.ToList();
+            foreach (var user in users)
+            {
+                var userRMPW = new UserRMPW
+                {
+                    userID = user.userID,
+                    email = user.email,
+                    displayName = user.displayName,
+                    phone = user.phone,
+                };
+                userRMPWList.Add(userRMPW);
+            }
+            return Ok(userRMPWList);
+        }
+
         //[HttpGet]
-        //public IActionResult GetAll()
+        ////[Route("{email:string}/{password:string}")]
+        //public IActionResult GetByEmailAndPassword(string email, string password)
         //{
-        //    var userRMPWList = new List<UserRMPW>();
-        //    var users = userDbContext.users.ToList();
-        //    foreach (var user in users)
+        //    var user = userDbContext.users.FirstOrDefault(x => x.email == email);
+        //    if (user == null)
         //    {
-        //        var userRMPW = new UserRMPW
-        //        {
-        //            userID = user.userID,
-        //            email = user.email,
-        //            displayName = user.displayName,
-        //            phone = user.phone,
-        //        };
-        //        userRMPWList.Add(userRMPW);
+        //        return NotFound(new { errorCode = 1, errorMessage = "Tài khoản không tồn tại" });
         //    }
-        //    return Ok(userRMPWList);
+        //    if (user.password != password)
+        //    //if (user.password != passwordHasher.HashPassword(password))
+        //    {
+        //        return BadRequest(new { errorCode = 2, errorMessage = "Mật khẩu không đúng" });
+        //    }
+
+        //    var userDTO = new UserDTO();
+        //    userDTO.userID = user.userID;
+        //    userDTO.email = user.email;
+        //    userDTO.displayName = user.displayName;
+        //    userDTO.phone = user.phone;
+
+        //    var jwtToken = tokenRepository.CreateJWTToken(userDTO);
+
+        //    /*var cookieOptions = new CookieOptions
+        //    {
+        //        HttpOnly = true, // Set the cookie as HTTP-only
+        //        SameSite = SameSiteMode.None,
+        //    };*/
+
+        //    //Response.Cookies.Append("jwtToken", jwtToken, cookieOptions);
+        //    return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
+        //    //return Ok(new LoginResponseDto() { token = jwtToken });
         //}
 
-        [HttpGet]
-        //[Route("{email:string}/{password:string}")]
-        public IActionResult GetByEmailAndPassword(string email, string password)
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginDTO login)
         {
-            var user = userDbContext.users.FirstOrDefault(x => x.email == email);
+            var user = userDbContext.users.FirstOrDefault(x => x.email == login.email);
             if (user == null)
             {
                 return NotFound(new { errorCode = 1, errorMessage = "Tài khoản không tồn tại" });
             }
-            //if (user.password != password)
-            if (user.password != passwordHasher.HashPassword(password))
+
+            if (user.password != login.password)
             {
                 return BadRequest(new { errorCode = 2, errorMessage = "Mật khẩu không đúng" });
             }
@@ -73,18 +106,12 @@ namespace InsuranceManagement.Controllers
 
             var jwtToken = tokenRepository.CreateJWTToken(userDTO);
 
-            /*var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true, // Set the cookie as HTTP-only
-                SameSite = SameSiteMode.None,
-            };*/
+            // Phần code xử lý cookie nếu cần thiết
 
-            //Response.Cookies.Append("jwtToken", jwtToken, cookieOptions);
-            //return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
-            return Ok(new LoginResponseDto() { token = jwtToken });
+            return Ok(new { errorCode = 0, errorMessage = "Đăng nhập thành công", userDTO });
         }
 
-        [HttpPost]
+        [HttpPost("sign-up")]
         public IActionResult CreateUser([FromBody] InsertUserDTO dto)
         {
             if (!ModelState.IsValid)
@@ -117,10 +144,11 @@ namespace InsuranceManagement.Controllers
             {
                 userID = Guid.NewGuid(),
                 email = dto.email,
-                /*password =   dto.password,*/
-                password = passwordHasher.HashPassword(dto.password),
+                password = dto.password,
+                //password = passwordHasher.HashPassword(dto.password),
                 displayName = dto.displayName,
                 phone = dto.phone,
+                role = "Customer"
             };
 
             userDbContext.users.Add(userDomain);
@@ -132,15 +160,16 @@ namespace InsuranceManagement.Controllers
                 email = userDomain.email,
                 displayName = userDomain.displayName,
                 phone = userDomain.phone,
+                role = userDomain.role,
             };
 
-            return CreatedAtAction(nameof(GetByEmailAndPassword), new { email = user_dto.email },
+            return CreatedAtAction(nameof(Login), new { email = user_dto.email },
                 new { errorCode = 6, errorMessage = "Tài khoản được tạo thành công", user = user_dto });
         }
 
         [HttpGet]
         [Route("{userId}")]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetById(string userId)
         {
             var user = userDbContext.users.FirstOrDefault(x => x.userID == Guid.Parse(userId));
@@ -162,7 +191,7 @@ namespace InsuranceManagement.Controllers
 
         [HttpPut]
         [Route("{userId}")]
-        [Authorize]
+        //[Authorize]
         public async Task <IActionResult> Update([FromRoute] string userId, [FromForm] UpdateUserDTO dto)
         {
             var userDomain = userDbContext.users.FirstOrDefault(x => x.userID == Guid.Parse(userId));
@@ -173,12 +202,6 @@ namespace InsuranceManagement.Controllers
 
             string result = await FirebaseService.UploadToFirebase(dto.image);
 
-            //if (dto.password != dto.retypePassword)
-            //{
-            //    return BadRequest(new { errorCode = 5, errorMessage = "Mật khẩu và Nhập lại mật khẩu không giống nhau. Xin kiểm tra lại!" });
-            //}
-
-            //userDomain.password = dto.password;
             userDomain.displayName = dto.displayName;
             userDomain.phone = dto.phone;
             userDomain.image = result;
@@ -187,8 +210,6 @@ namespace InsuranceManagement.Controllers
 
             var user_dto = new UserDTO()
             {
-                //password = userDomain.password,
-                //retypePassword = dto.retypePassword,
                 displayName = userDomain.displayName,
                 phone = userDomain.phone,
                 image = userDomain.image,
@@ -198,7 +219,7 @@ namespace InsuranceManagement.Controllers
         }
 
         [HttpGet("{userId}/purchased-insurances")]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetPurchasedInsurances(string userId)
         {
             var purchasedInsurances = userDbContext.purchases
@@ -218,6 +239,25 @@ namespace InsuranceManagement.Controllers
                 .ToList();
 
             return Ok(purchasedInsurances);
+        }
+
+        [HttpGet("{userId}/payment")]
+        //[Authorize]
+        public IActionResult GetPayment(string userId)
+        {
+            // ghi chu, hinh anh, tinh trang
+            var payment = userDbContext.payments
+                .Where(p => p.userID == Guid.Parse(userId))
+                .Select(p => new PaymentDTO
+                {
+                    note = p.note,
+                    image = p.image,
+                    status = p.status,
+                    reason = p.reason,
+                })
+                .ToList();
+
+            return Ok(payment);
         }
     }
 }
